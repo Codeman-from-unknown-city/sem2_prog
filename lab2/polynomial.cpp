@@ -89,9 +89,9 @@ void Polynomial::operator*=(double num) {
 }
 
 void Polynomial::operator*=(const Polynomial &other) {
-    for (auto& other_coefficient: other.coefficients)
-        if (coefficients.find(other_coefficient.first) != coefficients.end())
-            coefficients[other_coefficient.first] *= other_coefficient.second;
+    for (auto& coefficient: coefficients)
+        for (auto other_coefficient: other.coefficients)
+            coefficient.second *= other_coefficient.second;
 }
 
 Polynomial Polynomial::operator*(double num) {

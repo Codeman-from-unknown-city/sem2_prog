@@ -1,5 +1,5 @@
 CMakeLists.txt
 
-cmake-build-debuf
+cmake-build-debug
 
 .idea

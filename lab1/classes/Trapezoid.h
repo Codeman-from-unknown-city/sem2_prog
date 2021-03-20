@@ -5,7 +5,7 @@
 namespace geometry {
     class Trapezoid : public Shape {
     public:
-        Trapezoid(double a, double b, double c, double d);
+        Trapezoid(double base1, double base2, double side1, double side2);
         ~Trapezoid();
 
         Trapezoid(const Trapezoid& trapezoid);
@@ -15,7 +15,7 @@ namespace geometry {
         double getArea() override;
 
     private:
-        double a, b, c, d;
+        double base1, base2, side1, side2;
         double calcHeight() const;
     };
 }

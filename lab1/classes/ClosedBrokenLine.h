@@ -6,8 +6,9 @@ namespace geometry {
     class ClosedBrokenLine : public BrokenLine {
     public:
         explicit ClosedBrokenLine(Points points);
+        ClosedBrokenLine(const ClosedBrokenLine& other);
+        ClosedBrokenLine& operator=(const ClosedBrokenLine& other);
 
-    private:
-        static bool isOnOneLie(Point& p1, Point& p2, Point& p3);
+        double calcLen() const;
     };
 }

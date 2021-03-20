@@ -4,9 +4,9 @@
 #include "../interfaces/Shape.h"
 
 namespace geometry {
-    class Polygon : public ClosedBrokenLine, public Shape {
+    class Polygon: public Shape {
     public:
-        explicit Polygon(Points points);
+        explicit Polygon(const ClosedBrokenLine &line);
         ~Polygon();
 
         Polygon(const Polygon &polygon);
@@ -17,6 +17,7 @@ namespace geometry {
 
     private:
         static double calcCrossProduct(const Point &a, const Point &b, const Point &c) ;
-        static bool isConvex(Points &points);
+        static bool isConvex(const Points &points);
+        ClosedBrokenLine line;
     };
 }

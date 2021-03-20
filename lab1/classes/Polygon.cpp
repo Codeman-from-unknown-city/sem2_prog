@@ -1,21 +1,20 @@
 #include <functional>
-#include <utility>
 
 #include "Polygon.h"
 
-geometry::Polygon::Polygon(geometry::Points points) : ClosedBrokenLine(std::move(points)) {
-    if (!isConvex(points))
+geometry::Polygon::Polygon(const ClosedBrokenLine &line): line(line) {
+    if (!isConvex(line.getPoints()))
         throw std::runtime_error("Only convex polygon supported");
 }
 
 geometry::Polygon::~Polygon() = default;
 
-geometry::Polygon::Polygon(const geometry::Polygon &polygon): ClosedBrokenLine(polygon.points)
+geometry::Polygon::Polygon(const geometry::Polygon &polygon): line(polygon.line)
 {}
 
 geometry::Polygon &geometry::Polygon::operator=(const geometry::Polygon &polygon) {
     if (this != &polygon)
-        points = polygon.points;
+        line = polygon.line;
     return *this;
 }
 
@@ -27,7 +26,7 @@ double geometry::Polygon::calcCrossProduct(const geometry::Point &a, const geome
     return (BAx * BCy - BAy * BCx);
 }
 
-bool geometry::Polygon::isConvex(Points &points) {
+bool geometry::Polygon::isConvex(const Points &points) {
     bool neg = false;
     bool pos = false;
     int n = points.size();
@@ -35,7 +34,7 @@ bool geometry::Polygon::isConvex(Points &points) {
         int a = i;
         int b = (i + 1) % n;
         int c = (i + 2) % n;
-        double crossProduct = calcCrossProduct(*points[a], *points[b], *points[c]);
+        double crossProduct = calcCrossProduct(points[a], points[b], points[c]);
         if(crossProduct < 0)
             neg = true;
         else if(crossProduct > 0)
@@ -47,24 +46,18 @@ bool geometry::Polygon::isConvex(Points &points) {
 }
 
 double geometry::Polygon::getPerimeter() {
-    double perimeter = 0;
-    int n_elems = points.size();
-    for (int i = 0; i < n_elems - 1; ++i)
-        perimeter += points[i]->distTo(*points[i + 1]);
-    perimeter += points[0]->distTo(*points[n_elems - 1]);
-    return perimeter;
+    return line.calcLen();
 }
 
 double geometry::Polygon::getArea() {
     double area = 0;
+    Points points = line.getPoints();
     int n = points.size();
     int j = n - 1;
-    Point* p1;
-    Point* p2;
     for (int i = 0; i < n; ++i) {
-        p1 = points[i];
-        p2 = points[j];
-        area += (p1->x + p2->x) * (p1->y - p2->y);
+        const Point& p1 = points[i];
+        const Point& p2 = points[j];
+        area += (p1.x + p2.x) * (p1.y - p2.y);
         j = i;
     }
     return std::abs(area / 2.0);

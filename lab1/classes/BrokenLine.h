@@ -10,6 +10,8 @@ namespace geometry {
     class BrokenLine {
     public:
         explicit BrokenLine(Points points);
+        BrokenLine(const BrokenLine& other);
+        BrokenLine& operator=(const BrokenLine& other);
 
     private:
         static bool checkN(const Points& points);

@@ -7,6 +7,7 @@ namespace geometry {
         double y;
 
         Point(double x, double y);
+        Point();
         ~Point();
 
         Point(const Point& other);

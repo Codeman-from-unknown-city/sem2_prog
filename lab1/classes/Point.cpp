@@ -8,6 +8,9 @@ geometry::Point::Point(double x, double y)
   , y(y)
 {}
 
+geometry::Point::Point(): x(0), y(0)
+{}
+
 geometry::Point::~Point() = default;
 
 geometry::Point::Point(const Point &other)

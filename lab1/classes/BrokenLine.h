@@ -5,7 +5,7 @@
 #include "Point.h"
 
 namespace geometry {
-    using Points = std::vector<Point*>;
+    using Points = std::vector<Point>;
 
     class BrokenLine {
     public:
@@ -13,9 +13,10 @@ namespace geometry {
         BrokenLine(const BrokenLine& other);
         BrokenLine& operator=(const BrokenLine& other);
 
+        const Points& getPoints() const;
+        double calcLen() const;
+
     private:
-        static bool checkN(const Points& points);
-        static bool checkOnNull(const Points& points);
         static void deleteDuplicatePoints(Points& points);
 
     protected:

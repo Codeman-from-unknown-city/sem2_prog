@@ -5,9 +5,7 @@
 
 geometry::BrokenLine::BrokenLine(geometry::Points points): points(std::move(points)) {
     deleteDuplicatePoints(this->points);
-    if (!checkOnNull(this->points))
-        throw std::runtime_error("Points shouldn\'t be null");
-    if (!checkN(this->points))
+    if (this->points.size() > 2)
         throw std::runtime_error("The number of points must be more than 2");
 }
 
@@ -20,16 +18,18 @@ geometry::BrokenLine& geometry::BrokenLine::operator=(const geometry::BrokenLine
     return *this;
 }
 
-
 void geometry::BrokenLine::deleteDuplicatePoints(geometry::Points &points) {
     sort(points.begin(), points.end());
     points.erase(unique(points.begin(), points.end()), points.end());
 }
 
-bool geometry::BrokenLine::checkOnNull(const geometry::Points &points) {
-    return std::all_of(points.begin(), points.end(), [](const Point* point) {return point != nullptr;});
+const geometry::Points& geometry::BrokenLine::getPoints() const {
+    return points;
 }
 
-bool geometry::BrokenLine::checkN(const geometry::Points &points) {
-    return points.size() > 2;
+double geometry::BrokenLine::calcLen() const {
+    double len = 0;
+    for (size_t i = 0; i < points.size() - 1; i++)
+        len += points[i].distTo(points[i + 1]);
+    return len;
 }

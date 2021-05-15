@@ -33,8 +33,8 @@ int main() {
 	test(galgs::one_of(nums.begin(), nums.end(), is_even), false, 4);
 	test(galgs::is_sorted(nums.begin(), nums.end(), cmp<int>), std::is_sorted(nums.begin(), nums.end(), cmp<int>), 5);
 	test(galgs::is_partitioned(nums.begin(), nums.end(), is_even), std::is_partitioned(nums.begin(), nums.end(), is_even), 6);
-	test(galgs::find_not(nums.begin(), nums.end(), 3), std::pair<bool, std::vector<int>::iterator>(true, nums.begin()), 7);
-	test(galgs::find_backward(nums.begin(), nums.end(), 3), std::pair<bool, std::vector<int>::iterator>(true, nums.end() - 2), 8);
+	test(galgs::find_not(nums.begin(), nums.end(), 3), std::vector<int>::iterator(nums.begin()), 7);
+	test(galgs::find_backward(nums.begin(), nums.end(), 3), std::vector<int>::iterator(nums.end() - 2), 8);
 	test(galgs::is_palindrome(str.begin(), str.end(), cmp<char>), true, 9);
 
 	std::cout << "All tests passed" << std::endl;

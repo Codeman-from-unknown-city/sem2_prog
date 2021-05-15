@@ -1,5 +1,4 @@
 namespace galgs {
-
 template<class InputIterator, class UnaryPredicate>
 bool all_of(InputIterator first, InputIterator last, UnaryPredicate upred) {
 	while (first != last) {
@@ -54,60 +53,46 @@ bool is_sorted(InputIterator first, InputIterator last, BinaryPredicate bpred) {
 
 template<class InputIterator, class UnaryPredicate>
 bool is_partitioned(InputIterator first, InputIterator last, UnaryPredicate upred) {
-    for (; first != last; ++first)
+    for ( ; first != last; ++first)
         if (!upred(*first))
             break;
-    for (; first != last; ++first)
+    for ( ; first != last; ++first)
         if (upred(*first))
             return false;
     return true;
 }
 
 template<class InputIterator, class Elem>
-std::pair<bool, InputIterator> find_not(InputIterator first, InputIterator last, Elem elem) {
-	std::pair<bool, InputIterator> result;
+InputIterator find_not(InputIterator first, InputIterator last, Elem elem) {
 	while (first != last) {
-		if (*first != elem) {
-			result.first = true;
-			result.second = first;
-			return result;
-		}
+		if (*first != elem) 
+			return first;
 		++first;
 	}
-	result.first = false;
-	return result;
+	return last;
 }
 
 template<class InputIterator, class Elem>
-std::pair<bool, InputIterator> find_backward(InputIterator first, InputIterator last, Elem elem) {
-	std::pair<bool, InputIterator> result;
+InputIterator find_backward(InputIterator first, InputIterator last, Elem elem) {
+	InputIterator not_found(last);
 	--last;
 	while (first - 1 != last) {
-		if (*last == elem) {
-			result.first = true;
-			result.second = last;
-			return result;
-		}
+		if (*last == elem) 
+			return last;
 		--last;
 	}
-	result.first = false;
-	return result;
+	return not_found;
 }
 
 template<class InputIterator, class BinaryPredicate>
 bool is_palindrome(InputIterator first, InputIterator last, BinaryPredicate bpred) {
 	last--;
-	while (true) {
+	while (first != last) {
 		if (!bpred(*first, *last))
 			return false;
-		++first;
-		if (first == last)
-			break;
-		--last;
-		if (first == last)
-			break;
+		first++;
+		last--;
 	}
 	return true;
 }
-
 };

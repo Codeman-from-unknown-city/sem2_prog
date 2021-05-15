@@ -21,10 +21,10 @@ template<class InputIterator, class UnaryPredicate>
 bool is_partitioned(InputIterator first, InputIterator last, UnaryPredicate upred);
 
 template<class InputIterator, class Elem>
-std::pair<bool, InputIterator> find_not(InputIterator first, InputIterator last, Elem elem);
+InputIterator find_not(InputIterator first, InputIterator last, Elem elem);
 
 template<class InputIterator, class Elem>
-std::pair<bool, InputIterator> find_backward(InputIterator first, InputIterator last, Elem elem);
+InputIterator find_backward(InputIterator first, InputIterator last, Elem elem);
 
 template<class InputIterator, class BinaryPredicate>
 bool is_palindrome(InputIterator first, InputIterator last, BinaryPredicate bpred);

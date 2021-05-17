@@ -1,15 +1,16 @@
 #pragma once
 
-#include <cstddef>
-
 template<class T>
 class RingBuffer {
 public:
-    explicit RingBuffer(size_t capacity);
+    explicit RingBuffer(unsigned capacity);
+
+	RingBuffer(const RingBuffer<T>& other);
+	RingBuffer<T>& operator=(const RingBuffer<T>& other);
 
     ~RingBuffer();
 
-    T operator[](size_t index);
+    T operator[](unsigned index);
 
     void push_back(const T& elem);
 
@@ -19,15 +20,11 @@ public:
 
     T pop_front();
 
-    void resize(size_t new_capacity);
-
-    size_t capacity() const;
-
-    bool full() const;
+    void resize(unsigned new_capacity);
 
     class Iterator {
     public:
-        explicit Iterator(T* elem_ptr);
+        Iterator(RingBuffer<T>* obj, int elem_ind);
 
         Iterator(const Iterator& other);
 
@@ -47,7 +44,8 @@ public:
         T operator*();
 
     private:
-        T* elem_ptr;
+		RingBuffer* obj;
+		int elem_ind;
     };
 
     Iterator begin();
@@ -55,17 +53,20 @@ public:
     Iterator end();
 
 private:
+    [[nodiscard]] bool need_shift() const;
+    void change_index_val(int& ind, int num) const;
+
     T* buffer_;
-    size_t capacity_;
-    size_t head_;
-    size_t tail_;
+    unsigned capacity_;
+    int head_;
+    int tail_;
 };
 
 template<class T>
 bool operator==(const typename RingBuffer<T>::Iterator& i1,
                 const typename RingBuffer<T>::Iterator& i2)
 {
-    return i1.elem_ptr == i2.elem_ptr;
+    return i1.elem_ind == i2.elem_ind;
 }
 
 template<class T>

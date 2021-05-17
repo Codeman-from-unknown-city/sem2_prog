@@ -1,19 +1,13 @@
 #include <cstring>
 #include <cstdlib>
 
-#define __INCREASE_RB_POINTER(ptr, capacity) ptr = (ptr + 1) % capacity
-
-#define __DECREASE_RB_POINTER(ptr, capacity) \
-    ptr = (ptr == 0 ? capacity_ : ptr) - 1
-
 template<class T>
-RingBuffer<T>::RingBuffer(size_t capacity)
-        : capacity_(capacity)
-          , buffer_(new T[capacity])
-          , head_(0)
-          , tail_(0)
-{
-}
+RingBuffer<T>::RingBuffer(unsigned capacity)
+    : capacity_(capacity)
+    , buffer_(new T[capacity])
+    , head_(0)
+    , tail_(!!capacity)
+{}
 
 template<class T>
 RingBuffer<T>::~RingBuffer()
@@ -22,31 +16,79 @@ RingBuffer<T>::~RingBuffer()
 }
 
 template<class T>
-T RingBuffer<T>::operator[](size_t index)
+RingBuffer<T>::RingBuffer(const RingBuffer<T>& other)
+	: capacity_(other.capacity_)
+	, head_(other.head_)
+	, tail_(other.tail_)
+{
+	buffer_ = new T [capacity_];
+	for (unsigned i = 0; i < capacity_; ++i)
+	    buffer_[i] = other.buffer_[i];
+}
+
+template<class T>
+RingBuffer<T>& RingBuffer<T>::operator=(const RingBuffer<T>& other)
+{
+	if (this != &other) {
+		delete buffer_;
+		capacity_ = other.capacity_;
+		head_ = other.head_;
+		tail_ = other.tail_;
+		buffer_ = new T [capacity_];
+        for (unsigned i = 0; i < capacity_; ++i)
+            buffer_[i] = other.buffer_[i];
+	}
+	return *this;
+}
+
+template<class T>
+bool RingBuffer<T>::need_shift() const
+{
+    return head_ == tail_ && capacity_ > 1;
+}
+
+template<class T>
+void RingBuffer<T>::change_index_val(int& ind, int num) const
+{
+    ind += num;
+    if (ind < 0)
+        ind += capacity_;
+    if (ind >= capacity_)
+        ind %= capacity_;
+}
+
+template<class T>
+T RingBuffer<T>::operator[](unsigned index)
 {
     if (index >= capacity_)
-        throw std::runtime_error("Buffer out of bounds");
+        throw std::logic_error("Buffer out of bounds");
     return buffer_[index];
 }
 
 template<class T>
 void RingBuffer<T>::push_back(const T& elem)
 {
+	if (need_shift())
+        change_index_val(head_, 1);
     buffer_[tail_] = elem;
-    __INCREASE_RB_POINTER(tail_, capacity_);
+    change_index_val(tail_, 1);
 }
 
 template<class T>
 void RingBuffer<T>::push_front(const T& elem)
 {
-    __DECREASE_RB_POINTER(head_, capacity_);
+	if (need_shift())
+        change_index_val(tail_, -1);
+    change_index_val(head_, -1);
     buffer_[head_] = elem;
 }
 
 template<class T>
 T RingBuffer<T>::pop_back()
 {
-    __DECREASE_RB_POINTER(tail_, capacity_);
+    if (need_shift())
+        change_index_val(head_, -1);
+    change_index_val(tail_, -1);
     return buffer_[tail_];
 }
 
@@ -54,69 +96,61 @@ template<class T>
 T RingBuffer<T>::pop_front()
 {
     T* elem_ptr = buffer_ + head_;
-    __INCREASE_RB_POINTER(head_, capacity_);
+    if (need_shift())
+        change_index_val(tail_, 1);
+    change_index_val(head_, 1);
     return *elem_ptr;
 }
 
 template<class T>
-void RingBuffer<T>::resize(size_t new_capacity)
+void RingBuffer<T>::resize(unsigned new_capacity)
 {
     T* tmp = new T[new_capacity];
-    memcpy(tmp, buffer_,
-           sizeof(T) * (new_capacity < capacity_ ? new_capacity : capacity_));
+    for (unsigned i = 0; i < std::min(capacity_, new_capacity); ++i)
+        tmp[i] = buffer_[i];
     capacity_ = new_capacity;
     delete buffer_;
     buffer_ = tmp;
 }
 
 template<class T>
-size_t RingBuffer<T>::capacity() const
-{
-    return capacity_;
-}
-
-template<class T>
-bool RingBuffer<T>::full() const
-{
-    return tail_ == head_;
-}
-
-template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::begin()
 {
-    return RingBuffer::Iterator(buffer_ + head_);
+    return RingBuffer<T>::Iterator(this, head_);
 }
 
 template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::end()
 {
-    return RingBuffer::Iterator(buffer_ + tail_);
+    return RingBuffer<T>::Iterator(this, tail_);
 }
 
 template<class T>
-RingBuffer<T>::Iterator::Iterator(T* elem_ptr)
-        : elem_ptr(elem_ptr)
-{
-}
+RingBuffer<T>::Iterator::Iterator(RingBuffer<T>* obj, int elem_ind)
+		: obj(obj)
+        , elem_ind(elem_ind)
+{}
 
 template<class T>
 typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator++()
 {
-    elem_ptr++;
+	obj->change_index_val(elem_ind, 1);
     return *this;
 }
 
 template<class T>
 typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator--()
 {
-    elem_ptr--;
+    obj->change_index_val(elem_ind, -1);
     return *this;
 }
 
 template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::Iterator::operator+(int num)
 {
-    return Iterator(elem_ptr + num);
+    int new_iter_elem_ind = elem_ind;
+    obj->change_index_val(new_iter_elem_ind, num);
+    return Iterator(obj, new_iter_elem_ind);
 }
 
 template<class T>
@@ -128,20 +162,22 @@ typename RingBuffer<T>::Iterator RingBuffer<T>::Iterator::operator-(int num)
 template<class T>
 T RingBuffer<T>::Iterator::operator*()
 {
-    return *elem_ptr;
+    return (*obj)[elem_ind];
 }
 
 template<class T>
 RingBuffer<T>::Iterator::Iterator(const RingBuffer<T>::Iterator& other)
-        : elem_ptr(other.elem_ptr)
-{
-}
+		: obj(other.obj)
+        , elem_ind(other.elem_ind)
+{}
 
 template<class T>
 typename RingBuffer<T>::Iterator&
 RingBuffer<T>::Iterator::operator=(const RingBuffer<T>::Iterator& other)
 {
-    if (this != &other)
-        elem_ptr = other.elem_ptr;
+    if (this != &other) {
+		obj = other.obj;
+        elem_ind = other.elem_ind;
+	}
     return *this;
 }

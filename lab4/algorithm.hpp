@@ -45,9 +45,16 @@ bool one_of(InputIterator first, InputIterator last, UnaryPredicate upred) {
 
 template<class InputIterator, class BinaryPredicate>
 bool is_sorted(InputIterator first, InputIterator last, BinaryPredicate bpred) {
-	while (first != last - 1) 
-		if (!bpred(*first, *++first))
+	if (first == last)
+		return true;
+	last--;
+	InputIterator prev;
+	while (first != last) {
+		prev = first;
+		first++;
+		if (!bpred(*prev, *first))
 				return false;
+	}
 	return true;
 }
 
@@ -75,23 +82,23 @@ InputIterator find_not(InputIterator first, InputIterator last, Elem elem) {
 template<class InputIterator, class Elem>
 InputIterator find_backward(InputIterator first, InputIterator last, Elem elem) {
 	InputIterator not_found(last);
-	--last;
-	while (first - 1 != last) {
+	while (first != last) {
+		--last;
 		if (*last == elem) 
 			return last;
-		--last;
 	}
 	return not_found;
 }
 
 template<class InputIterator, class BinaryPredicate>
 bool is_palindrome(InputIterator first, InputIterator last, BinaryPredicate bpred) {
-	last--;
 	while (first != last) {
+		last--;
+		if (last == first)
+			break;
 		if (!bpred(*first, *last))
 			return false;
 		first++;
-		last--;
 	}
 	return true;
 }

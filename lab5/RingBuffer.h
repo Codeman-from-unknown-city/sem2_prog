@@ -53,8 +53,8 @@ public:
     Iterator end();
 
 private:
-    [[nodiscard]] bool need_shift() const;
-    void change_index_val(int& ind, int num) const;
+    bool need_shift() const;
+    void shift(int& ind, int num) const;
 
     T* buffer_;
     unsigned capacity_;

@@ -48,7 +48,7 @@ bool RingBuffer<T>::need_shift() const
 }
 
 template<class T>
-void RingBuffer<T>::change_index_val(int& ind, int num) const
+void RingBuffer<T>::shift(int& ind, int num) const
 {
     ind += num;
     if (ind < 0)
@@ -69,17 +69,17 @@ template<class T>
 void RingBuffer<T>::push_back(const T& elem)
 {
 	if (need_shift())
-        change_index_val(head_, 1);
+        shift(head_, 1);
     buffer_[tail_] = elem;
-    change_index_val(tail_, 1);
+    shift(tail_, 1);
 }
 
 template<class T>
 void RingBuffer<T>::push_front(const T& elem)
 {
 	if (need_shift())
-        change_index_val(tail_, -1);
-    change_index_val(head_, -1);
+        shift(tail_, -1);
+    shift(head_, -1);
     buffer_[head_] = elem;
 }
 
@@ -87,8 +87,8 @@ template<class T>
 T RingBuffer<T>::pop_back()
 {
     if (need_shift())
-        change_index_val(head_, -1);
-    change_index_val(tail_, -1);
+        shift(head_, -1);
+    shift(tail_, -1);
     return buffer_[tail_];
 }
 
@@ -97,8 +97,8 @@ T RingBuffer<T>::pop_front()
 {
     T* elem_ptr = buffer_ + head_;
     if (need_shift())
-        change_index_val(tail_, 1);
-    change_index_val(head_, 1);
+        shift(tail_, 1);
+    shift(head_, 1);
     return *elem_ptr;
 }
 
@@ -134,14 +134,14 @@ RingBuffer<T>::Iterator::Iterator(RingBuffer<T>* obj, int elem_ind)
 template<class T>
 typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator++()
 {
-	obj->change_index_val(elem_ind, 1);
+	obj->shift(elem_ind, 1);
     return *this;
 }
 
 template<class T>
 typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator--()
 {
-    obj->change_index_val(elem_ind, -1);
+    obj->shift(elem_ind, -1);
     return *this;
 }
 
@@ -149,7 +149,7 @@ template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::Iterator::operator+(int num)
 {
     int new_iter_elem_ind = elem_ind;
-    obj->change_index_val(new_iter_elem_ind, num);
+    obj->shift(new_iter_elem_ind, num);
     return Iterator(obj, new_iter_elem_ind);
 }
 

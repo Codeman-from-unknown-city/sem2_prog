@@ -51,10 +51,9 @@ template<class T>
 void RingBuffer<T>::shift(int& ind, int num) const
 {
     ind += num;
+	ind %= capacity_;
     if (ind < 0)
         ind += capacity_;
-    if (ind >= capacity_)
-        ind %= capacity_;
 }
 
 template<class T>

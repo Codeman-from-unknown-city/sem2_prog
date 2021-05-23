@@ -85,3 +85,4 @@ bool operator!=(typename RingBuffer<T>::Iterator& i1,
 }
 
 #include "RingBuffer.hpp"
+

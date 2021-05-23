@@ -210,3 +210,4 @@ RingBuffer<T>::Iterator::operator=(const RingBuffer<T>::Iterator& other)
     }
     return *this;
 }
+

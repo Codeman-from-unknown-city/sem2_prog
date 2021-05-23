@@ -12,3 +12,4 @@ int main()
     assert(*(rbuf.end() - 2) == 2);
     return 0;
 }
+

@@ -174,8 +174,8 @@ typename RingBuffer<T>::Iterator RingBuffer<T>::Iterator::operator+(int num)
 {
     int new_iter_elem_ind = elem_ind;
     obj->shift(new_iter_elem_ind, num);
-    // "&& num" to avoid + 0 influence
-    bool is_new_iter_point_to_end = obj->full() && elem_ind == obj->head_ && num;
+    // "(num || is_end)" to avoid + 0 influence
+    bool is_new_iter_point_to_end = obj->full() && elem_ind == obj->head_ && (num || is_end);
     return Iterator(obj, new_iter_elem_ind, is_new_iter_point_to_end);
 }
 

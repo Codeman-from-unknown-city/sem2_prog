@@ -121,9 +121,9 @@ void RingBuffer<T>::resize(unsigned new_capacity)
     T* tmp = new T[new_capacity];
     for (unsigned i = 0; i < std::min(capacity_, new_capacity); ++i)
         tmp[i] = buffer_[i];
+    capacity_ = new_capacity;    
     if (size_ > capacity_)
         size_ = capacity_;
-    capacity_ = new_capacity;
     delete buffer_;
     buffer_ = tmp;
 }

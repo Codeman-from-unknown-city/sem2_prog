@@ -6,6 +6,7 @@
 int main()
 {
     RingBuffer<int> rbuf(10);
+    rbuf.push_back(4);
     rbuf.push_back(2);
     rbuf.push_back(3);
     assert(*(rbuf.end() - 2) == 2);

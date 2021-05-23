@@ -109,6 +109,13 @@ void RingBuffer<T>::resize(unsigned new_capacity)
 }
 
 template<class T>
+bool RingBuffer<T>::full() const
+{
+	return head_ == tail_;
+}
+
+
+template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::begin()
 {
     return RingBuffer<T>::Iterator(this, head_, false);
@@ -131,7 +138,7 @@ template<class T>
 typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator++()
 {
 	obj->shift(elem_ind, 1);
-	cnt++;
+	is_end = obj->full() && elem_ind == obj->head_;
     return *this;
 }
 
@@ -139,7 +146,6 @@ template<class T>
 typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator--()
 {
     obj->shift(elem_ind, -1);
-	cnt--;
     return *this;
 }
 
@@ -148,6 +154,7 @@ typename RingBuffer<T>::Iterator RingBuffer<T>::Iterator::operator+(int num)
 {
     int new_iter_elem_ind = elem_ind;
     obj->shift(new_iter_elem_ind, num);
+	is_end = obj->full() && elem_ind == obj->head_;
     return Iterator(obj, new_iter_elem_ind);
 }
 
@@ -167,7 +174,6 @@ template<class T>
 RingBuffer<T>::Iterator::Iterator(const RingBuffer<T>::Iterator& other)
 	: obj(other.obj)
 	, elem_ind(other.elem_ind)
-	, cnt(other.cnt)
 	, is_end(other.is_end)
 {}
 
@@ -178,7 +184,6 @@ RingBuffer<T>::Iterator::operator=(const RingBuffer<T>::Iterator& other)
     if (this != &other) {
 		obj = other.obj;
         elem_ind = other.elem_ind;
-		cnt = other.cnt;
 		is_end = other.is_end;
 	}
     return *this;

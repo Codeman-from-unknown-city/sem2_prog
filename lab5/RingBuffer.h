@@ -22,6 +22,8 @@ public:
 
     void resize(unsigned new_capacity);
 
+	bool full() const;
+
     class Iterator {
     public:
         Iterator(RingBuffer* obj, int elem_ind);
@@ -46,7 +48,6 @@ public:
     private:
 		RingBuffer* obj;
 		int elem_ind;
-		int cnt;
 		bool is_end;
     };
 
@@ -68,7 +69,7 @@ template<class T>
 bool operator==(typename RingBuffer<T>::Iterator& i1,
                 typename RingBuffer<T>::Iterator& i2)
 {
-	return i2.is_end ? i1.cnt >= i1.obj->capacity || i1.is_end : i1.elem_ind == i2.elem_ind;
+	return i2.is_end ? i1.is_end : i1.elem_ind == i2.elem_ind;
 }
 
 template<class T>

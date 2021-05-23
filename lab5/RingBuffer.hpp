@@ -112,19 +112,25 @@ void RingBuffer<T>::resize(unsigned new_capacity)
 template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::begin()
 {
-    return RingBuffer<T>::Iterator(this, head_);
+    return RingBuffer<T>::Iterator(this, head_, true);
 }
 
 template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::end()
 {
-    return RingBuffer<T>::Iterator(this, tail_);
+	int end_ind = tail_;
+	if (obj->need_shift())
+		obj->shift(end_ind, 1);
+    return RingBuffer<T>::Iterator(this, end_ind, false);
 }
 
 template<class T>
-RingBuffer<T>::Iterator::Iterator(RingBuffer<T>* obj, int elem_ind)
-		: obj(obj)
-        , elem_ind(elem_ind)
+RingBuffer<T>::Iterator::Iterator(RingBuffer<T>* obj, int elem_ind, bool is_begin)
+	: obj(obj)
+	, elem_ind(elem_ind)
+	, is_begin(is_begin)
+	, is_rb_full(obj->head == obj->tail)
+	, is_was_checked(false)
 {}
 
 template<class T>

@@ -46,6 +46,9 @@ public:
     private:
 		RingBuffer* obj;
 		int elem_ind;
+		bool is_begin;
+		bool is_rb_full;
+		bool is_was_checked;
     };
 
     Iterator begin();
@@ -66,7 +69,13 @@ template<class T>
 bool operator==(const typename RingBuffer<T>::Iterator& i1,
                 const typename RingBuffer<T>::Iterator& i2)
 {
-    return i1.elem_ind == i2.elem_ind;
+	Iterator& begin = i1.is_begin ? i1 : i2;
+	bool result = i1.elem_ind == i2.elem_ind;
+	if (begin.is_rb_full)
+		result = result && begin.is_was_cheched;
+	if (begin.is_rb_full && !begin.is_was_checked)
+		begin.is_was_checked = true;
+    return result;
 }
 
 template<class T>

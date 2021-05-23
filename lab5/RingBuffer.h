@@ -58,9 +58,11 @@ public:
 private:
     bool need_shift() const;
     void shift(int& ind, int num) const;
+	void increase_size_and_check_for_fullness();
 
     T* buffer_;
     unsigned capacity_;
+	unsigned size_;
     int head_;
     int tail_;
 };

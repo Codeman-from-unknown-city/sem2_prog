@@ -1,6 +1,7 @@
 template<class T>
 RingBuffer<T>::RingBuffer(unsigned capacity)
     : capacity_(capacity)
+	, size(0)
     , buffer_(new T[capacity])
     , head_(0)
     , tail_(capacity > 1)
@@ -52,6 +53,14 @@ void RingBuffer<T>::shift(int& ind, int num) const
         ind += capacity_;
 }
 
+void increase_size_and_check_for_fullness()
+{
+	if (head_ == tail_)
+		size_ = capacity_;
+	else
+		size_++;
+}
+
 template<class T>
 T RingBuffer<T>::operator[](unsigned index)
 {
@@ -63,24 +72,27 @@ T RingBuffer<T>::operator[](unsigned index)
 template<class T>
 void RingBuffer<T>::push_back(const T& elem)
 {
-	if (need_shift())
+	if (need_shift()) 
         shift(head_, 1);
     buffer_[tail_] = elem;
     shift(tail_, 1);
+	increase_size_and_check_for_fullness();
 }
 
 template<class T>
 void RingBuffer<T>::push_front(const T& elem)
 {
-	if (need_shift())
+	if (need_shift()) 
         shift(tail_, -1);
     shift(head_, -1);
     buffer_[head_] = elem;
+	increase_size_and_check_for_fullness();
 }
 
 template<class T>
 T RingBuffer<T>::pop_back()
 {
+	size--;
     if (need_shift())
         shift(head_, -1);
     shift(tail_, -1);
@@ -90,6 +102,7 @@ T RingBuffer<T>::pop_back()
 template<class T>
 T RingBuffer<T>::pop_front()
 {
+	size--;
     T* elem_ptr = buffer_ + head_;
     if (need_shift())
         shift(tail_, 1);
@@ -111,9 +124,8 @@ void RingBuffer<T>::resize(unsigned new_capacity)
 template<class T>
 bool RingBuffer<T>::full() const
 {
-	return head_ == tail_;
+	return size_ == capacity_;
 }
-
 
 template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::begin()
@@ -154,7 +166,7 @@ typename RingBuffer<T>::Iterator RingBuffer<T>::Iterator::operator+(int num)
 {
     int new_iter_elem_ind = elem_ind;
     obj->shift(new_iter_elem_ind, num);
-	is_end = obj->full() && elem_ind == obj->head_;
+	is_end = obj->full() && elem_ind == obj->head_ && num; // "&& num" to avoid + 0 changes
     return Iterator(obj, new_iter_elem_ind);
 }
 

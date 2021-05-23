@@ -66,8 +66,8 @@ private:
 };
 
 template<class T>
-bool operator==(const typename RingBuffer<T>::Iterator& i1,
-                const typename RingBuffer<T>::Iterator& i2)
+bool operator==(typename RingBuffer<T>::Iterator& i1,
+                typename RingBuffer<T>::Iterator& i2)
 {
 	Iterator& begin = i1.is_begin ? i1 : i2;
 	bool result = i1.elem_ind == i2.elem_ind;
@@ -79,8 +79,8 @@ bool operator==(const typename RingBuffer<T>::Iterator& i1,
 }
 
 template<class T>
-bool operator!=(const typename RingBuffer<T>::Iterator& i1,
-                const typename RingBuffer<T>::Iterator& i2)
+bool operator!=(typename RingBuffer<T>::Iterator& i1,
+                typename RingBuffer<T>::Iterator& i2)
 {
     return !(i1 == i2);
 }

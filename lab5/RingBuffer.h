@@ -5,8 +5,9 @@ class RingBuffer {
 public:
     explicit RingBuffer(unsigned capacity);
 
-	RingBuffer(const RingBuffer<T>& other);
-	RingBuffer<T>& operator=(const RingBuffer<T>& other);
+    RingBuffer(const RingBuffer<T>& other);
+
+    RingBuffer<T>& operator=(const RingBuffer<T>& other);
 
     ~RingBuffer();
 
@@ -22,11 +23,11 @@ public:
 
     void resize(unsigned new_capacity);
 
-	bool full() const;
+    bool full() const;
 
     class Iterator {
     public:
-        Iterator(RingBuffer* obj, int elem_ind);
+        Iterator(RingBuffer* obj, int elem_ind, bool is_end);
 
         Iterator(const Iterator& other);
 
@@ -46,9 +47,9 @@ public:
         T operator*();
 
     private:
-		RingBuffer* obj;
-		int elem_ind;
-		bool is_end;
+        RingBuffer* obj;
+        int elem_ind;
+        bool is_end;
     };
 
     Iterator begin();
@@ -57,21 +58,23 @@ public:
 
 private:
     bool need_shift() const;
+
     void shift(int& ind, int num) const;
-	void increase_size_and_check_for_fullness();
+
+    void increase_size_and_check_for_fullness();
 
     T* buffer_;
     unsigned capacity_;
-	unsigned size_;
+    unsigned size_;
     int head_;
     int tail_;
 };
 
 template<class T>
-bool operator==(typename RingBuffer<T>::Iterator& i1,
-                typename RingBuffer<T>::Iterator& i2)
+bool operator==(const typename RingBuffer<T>::Iterator& i1,
+                const typename RingBuffer<T>::Iterator& i2)
 {
-	return i2.is_end ? i1.is_end : i1.elem_ind == i2.elem_ind;
+    return i2.is_end ? i1.is_end : i1.elem_ind == i2.elem_ind;
 }
 
 template<class T>

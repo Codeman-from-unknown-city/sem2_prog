@@ -1,12 +1,9 @@
-#include <cstring>
-#include <cstdlib>
-
 template<class T>
 RingBuffer<T>::RingBuffer(unsigned capacity)
     : capacity_(capacity)
     , buffer_(new T[capacity])
     , head_(0)
-    , tail_(!!capacity)
+    , tail_(capacity > 1)
 {}
 
 template<class T>

@@ -24,14 +24,14 @@ public:
 
     class Iterator {
     public:
-        Iterator(RingBuffer<T>* obj, int elem_ind);
+        Iterator(RingBuffer* obj, int elem_ind);
 
         Iterator(const Iterator& other);
 
         Iterator& operator=(const Iterator& other);
 
-        friend bool operator==(const RingBuffer<T>::Iterator& i1,
-                               const RingBuffer<T>::Iterator& i2);
+        friend bool operator==(const RingBuffer::Iterator& i1,
+                               const RingBuffer::Iterator& i2);
 
         Iterator& operator++();
 

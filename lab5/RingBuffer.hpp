@@ -28,8 +28,7 @@ RingBuffer<T>& RingBuffer<T>::operator=(const RingBuffer<T>& other)
 {
 	if (this != &other) {
 		delete buffer_;
-		capacity_ = other.capacity_;
-		head_ = other.head_;
+		capacity_ = other.capacity_; head_ = other.head_;
 		tail_ = other.tail_;
 		buffer_ = new T [capacity_];
         for (unsigned i = 0; i < capacity_; ++i)
@@ -112,31 +111,27 @@ void RingBuffer<T>::resize(unsigned new_capacity)
 template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::begin()
 {
-    return RingBuffer<T>::Iterator(this, head_, true);
+    return RingBuffer<T>::Iterator(this, head_, false);
 }
 
 template<class T>
 typename RingBuffer<T>::Iterator RingBuffer<T>::end()
 {
-	int end_ind = tail_;
-	if (obj->need_shift())
-		obj->shift(end_ind, 1);
-    return RingBuffer<T>::Iterator(this, end_ind, false);
+    return RingBuffer<T>::Iterator(this, tail_, true);
 }
 
 template<class T>
-RingBuffer<T>::Iterator::Iterator(RingBuffer<T>* obj, int elem_ind, bool is_begin)
+RingBuffer<T>::Iterator::Iterator(RingBuffer<T>* obj, int elem_ind, bool is_end)
 	: obj(obj)
 	, elem_ind(elem_ind)
-	, is_begin(is_begin)
-	, is_rb_full(obj->head == obj->tail)
-	, is_was_checked(false)
+	, is_end(is_end)
 {}
 
 template<class T>
 typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator++()
 {
 	obj->shift(elem_ind, 1);
+	cnt++;
     return *this;
 }
 
@@ -144,6 +139,7 @@ template<class T>
 typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator--()
 {
     obj->shift(elem_ind, -1);
+	cnt--;
     return *this;
 }
 
@@ -169,8 +165,10 @@ T RingBuffer<T>::Iterator::operator*()
 
 template<class T>
 RingBuffer<T>::Iterator::Iterator(const RingBuffer<T>::Iterator& other)
-		: obj(other.obj)
-        , elem_ind(other.elem_ind)
+	: obj(other.obj)
+	, elem_ind(other.elem_ind)
+	, cnt(other.cnt)
+	, is_end(other.is_end)
 {}
 
 template<class T>
@@ -180,6 +178,8 @@ RingBuffer<T>::Iterator::operator=(const RingBuffer<T>::Iterator& other)
     if (this != &other) {
 		obj = other.obj;
         elem_ind = other.elem_ind;
+		cnt = other.cnt;
+		is_end = other.is_end;
 	}
     return *this;
 }

@@ -1,5 +1,9 @@
 CMakeLists.txt
-
+[Mm]akefile
 cmake-build-debug
 
-.idea
+*.[oa]
+*~
+*.out
+.*
+!.gitignore

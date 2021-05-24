@@ -2,8 +2,7 @@
 
 namespace game {
     const int N_EDGES = 6;
-    const int CUBE_HEIGHT = 3;
-    const int CUBE_WIDTH = 3;
+    const int CUBE_DIMENSION = 3;
 
     enum COLORS {
         GREEN,

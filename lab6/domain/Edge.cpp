@@ -1,7 +1,7 @@
 #include "Edge.h"
 
 game::Edge::Edge(EDGE_POSITION pos, COLORS color)
-        : squares(3, std::vector<COLORS>(3, color))
+        : squares(CUBE_DIMENSION, std::vector<COLORS>(CUBE_DIMENSION, color))
         , pos(pos)
 {}
 

@@ -33,8 +33,9 @@ public:
 
         Iterator& operator=(const Iterator& other);
 
-        friend bool operator==(const RingBuffer<T>::Iterator& i1,
-                               const RingBuffer<T>::Iterator& i2);
+        template<class U>
+        friend bool operator==(const typename RingBuffer<U>::Iterator& i1,
+                               const typename RingBuffer<U>::Iterator& i2);
 
         Iterator& operator++();
 
@@ -70,9 +71,9 @@ private:
     int tail_;
 };
 
-template<class T>
-bool operator==(const typename RingBuffer<T>::Iterator& i1,
-                const typename RingBuffer<T>::Iterator& i2)
+template<class U>
+bool operator==(const typename RingBuffer<U>::Iterator& i1,
+                const typename RingBuffer<U>::Iterator& i2)
 {
     return i2.is_end ? i1.is_end : i1.elem_ind == i2.elem_ind;
 }

@@ -119,7 +119,7 @@ private:
 
     void increase_size_and_check_for_fullness();
 
-	Alloc alloc_;
+    Alloc alloc_;
     T* buffer_;
     unsigned capacity_;
     unsigned size_;

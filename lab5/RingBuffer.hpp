@@ -1,55 +1,71 @@
-template<class T>
-RingBuffer<T>::RingBuffer(unsigned capacity)
+#include <algorithm>
+
+template<class T, class Alloc>
+void RingBuffer<T, Alloc>::allocate_buf()
+{
+	buffer_ = alloc_.allocate(capacity_);
+}
+
+template<class T, class Alloc>
+void RingBuffer<T, Alloc>::destruct_buf()
+{
+	for (unsigned i = 0; i < capacity_; i++)
+		alloc_.destroy(buffer_ + i);
+	alloc_.deallocate(buffer_, capacity_);
+}
+
+template<class T, class Alloc>
+RingBuffer<T, Alloc>::RingBuffer(unsigned capacity, Alloc alloc)
         : capacity_(capacity)
+		  , alloc_(alloc)
           , size_(0)
-          , buffer_(new T[capacity])
           , head_(0)
           , tail_(capacity > 1)
 {
+	allocate_buf();
 }
 
-template<class T>
-RingBuffer<T>::~RingBuffer()
+template<class T, class Alloc>
+RingBuffer<T, Alloc>::~RingBuffer()
 {
-    delete buffer_;
+	destruct_buf();
 }
 
-template<class T>
-RingBuffer<T>::RingBuffer(const RingBuffer<T>& other)
+template<class T, class Alloc>
+RingBuffer<T, Alloc>::RingBuffer(const RingBuffer<T, Alloc>& other)
         : capacity_(other.capacity_)
+		  , alloc_(other.alloc_)
           , size_(other.size_)
           , head_(other.head_)
           , tail_(other.tail_)
 {
-    buffer_ = new T[capacity_];
-    for (unsigned i = 0; i < capacity_; ++i)
-        buffer_[i] = other.buffer_[i];
+	allocate_buf();
+	std::copy(other.cbegin(), other.cend(), begin());
 }
 
-template<class T>
-RingBuffer<T>& RingBuffer<T>::operator=(const RingBuffer<T>& other)
+template<class T, class Alloc>
+RingBuffer<T, Alloc>& RingBuffer<T, Alloc>::operator=(const RingBuffer<T, Alloc>& other)
 {
     if (this != &other) {
-        delete buffer_;
+		destruct_buf();
         capacity_ = other.capacity_;
         size_ = other.size_;
         head_ = other.head_;
         tail_ = other.tail_;
-        buffer_ = new T[capacity_];
-        for (unsigned i = 0; i < capacity_; ++i)
-            buffer_[i] = other.buffer_[i];
+		allocate_buf();
+        std::copy(other.begin(), other.end(), begin());
     }
     return *this;
 }
 
-template<class T>
-bool RingBuffer<T>::need_shift() const
+template<class T, class Alloc>
+bool RingBuffer<T, Alloc>::need_shift() const
 {
     return head_ == tail_ && capacity_ > 1;
 }
 
-template<class T>
-void RingBuffer<T>::shift(int& ind, int num) const
+template<class T, class Alloc>
+void RingBuffer<T, Alloc>::shift(int& ind, int num) const
 {
     ind += num;
     ind %= capacity_;
@@ -57,8 +73,8 @@ void RingBuffer<T>::shift(int& ind, int num) const
         ind += capacity_;
 }
 
-template<class T>
-void RingBuffer<T>::increase_size_and_check_for_fullness()
+template<class T, class Alloc>
+void RingBuffer<T, Alloc>::increase_size_and_check_for_fullness()
 {
     if (head_ == tail_)
         size_ = capacity_;
@@ -66,16 +82,24 @@ void RingBuffer<T>::increase_size_and_check_for_fullness()
         size_++;
 }
 
-template<class T>
-T RingBuffer<T>::operator[](unsigned index)
+template<class T, class Alloc>
+T& RingBuffer<T, Alloc>::operator[](unsigned index)
 {
     if (index >= capacity_)
         throw std::logic_error("Buffer out of bounds");
     return buffer_[index];
 }
 
-template<class T>
-void RingBuffer<T>::push_back(const T& elem)
+template<class T, class Alloc>
+T RingBuffer<T, Alloc>::operator[](unsigned int index) const
+{
+    if (index >= capacity_)
+        throw std::logic_error("Buffer out of bounds");
+    return buffer_[index];
+}
+
+template<class T, class Alloc>
+void RingBuffer<T, Alloc>::push_back(const T& elem)
 {
     if (need_shift())
         shift(head_, 1);
@@ -84,8 +108,8 @@ void RingBuffer<T>::push_back(const T& elem)
     increase_size_and_check_for_fullness();
 }
 
-template<class T>
-void RingBuffer<T>::push_front(const T& elem)
+template<class T, class Alloc>
+void RingBuffer<T, Alloc>::push_front(const T& elem)
 {
     if (need_shift())
         shift(tail_, -1);
@@ -94,8 +118,8 @@ void RingBuffer<T>::push_front(const T& elem)
     increase_size_and_check_for_fullness();
 }
 
-template<class T>
-T RingBuffer<T>::pop_back()
+template<class T, class Alloc>
+T RingBuffer<T, Alloc>::pop_back()
 {
     size_--;
     if (need_shift())
@@ -104,8 +128,8 @@ T RingBuffer<T>::pop_back()
     return buffer_[tail_];
 }
 
-template<class T>
-T RingBuffer<T>::pop_front()
+template<class T, class Alloc>
+T RingBuffer<T, Alloc>::pop_front()
 {
     size_--;
     T* elem_ptr = buffer_ + head_;
@@ -115,99 +139,45 @@ T RingBuffer<T>::pop_front()
     return *elem_ptr;
 }
 
-template<class T>
-void RingBuffer<T>::resize(unsigned new_capacity)
+template<class T, class Alloc>
+void RingBuffer<T, Alloc>::resize(unsigned new_capacity)
 {
-    T* tmp = new T[new_capacity];
+    T* tmp = alloc_.allocate(new_capacity);
     for (unsigned i = 0; i < std::min(capacity_, new_capacity); ++i)
         tmp[i] = buffer_[i];
     capacity_ = new_capacity;    
     if (size_ > capacity_)
         size_ = capacity_;
-    delete buffer_;
+	destruct_buf();
     buffer_ = tmp;
 }
 
-template<class T>
-bool RingBuffer<T>::full() const
+template<class T, class Alloc>
+bool RingBuffer<T, Alloc>::full() const
 {
     return size_ == capacity_;
 }
 
-template<class T>
-typename RingBuffer<T>::Iterator RingBuffer<T>::begin()
+template<class T, class Alloc>
+typename RingBuffer<T, Alloc>::Iterator RingBuffer<T, Alloc>::begin()
 {
-    return RingBuffer<T>::Iterator(this, head_, false);
+    return RingBuffer<T, Alloc>::Iterator(this, head_, size_ > 0);
 }
 
-template<class T>
-typename RingBuffer<T>::Iterator RingBuffer<T>::end()
+template<class T, class Alloc>
+typename RingBuffer<T, Alloc>::Iterator RingBuffer<T, Alloc>::end()
 {
-    return RingBuffer<T>::Iterator(this, tail_, true);
+    return RingBuffer<T, Alloc>::Iterator(this, tail_, true);
 }
 
-template<class T>
-RingBuffer<T>::Iterator::Iterator(RingBuffer<T>* obj, int elem_ind, bool is_end)
-        : obj(obj)
-          , elem_ind(elem_ind)
-          , is_end(is_end)
+template<class T, class Alloc>
+typename RingBuffer<T, Alloc>::ConstIterator RingBuffer<T, Alloc>::cbegin() const
 {
+    return RingBuffer::ConstIterator(static_cast<const RingBuffer<T, Alloc>*>(this), 0, size_ > 0);
 }
 
-template<class T>
-typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator++()
+template<class T, class Alloc>
+typename RingBuffer<T, Alloc>::ConstIterator RingBuffer<T, Alloc>::cend() const
 {
-    obj->shift(elem_ind, 1);
-    is_end = obj->full() && elem_ind == obj->head_;
-    return *this;
+    return RingBuffer<T, Alloc>::ConstIterator(static_cast<const RingBuffer<T, Alloc>*>(this), tail_, true);
 }
-
-template<class T>
-typename RingBuffer<T>::Iterator& RingBuffer<T>::Iterator::operator--()
-{
-    obj->shift(elem_ind, -1);
-    return *this;
-}
-
-template<class T>
-typename RingBuffer<T>::Iterator RingBuffer<T>::Iterator::operator+(int num)
-{
-    int new_iter_elem_ind = elem_ind;
-    obj->shift(new_iter_elem_ind, num);
-    // "(num || is_end)" to avoid + 0 influence
-    bool is_new_iter_point_to_end = obj->full() && elem_ind == obj->head_ && (num || is_end);
-    return Iterator(obj, new_iter_elem_ind, is_new_iter_point_to_end);
-}
-
-template<class T>
-typename RingBuffer<T>::Iterator RingBuffer<T>::Iterator::operator-(int num)
-{
-    return *this + -num;
-}
-
-template<class T>
-T RingBuffer<T>::Iterator::operator*()
-{
-    return (*obj)[elem_ind];
-}
-
-template<class T>
-RingBuffer<T>::Iterator::Iterator(const RingBuffer<T>::Iterator& other)
-        : obj(other.obj)
-          , elem_ind(other.elem_ind)
-          , is_end(other.is_end)
-{
-}
-
-template<class T>
-typename RingBuffer<T>::Iterator&
-RingBuffer<T>::Iterator::operator=(const RingBuffer<T>::Iterator& other)
-{
-    if (this != &other) {
-        obj = other.obj;
-        elem_ind = other.elem_ind;
-        is_end = other.is_end;
-    }
-    return *this;
-}
-

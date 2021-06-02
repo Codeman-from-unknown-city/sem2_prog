@@ -6,6 +6,9 @@
 int main()
 {
     RingBuffer<int> rbuf(10);
+    RingBuffer<int> rbuf2 = rbuf;
+    rbuf2.resize(200);
+    RingBuffer<int> rbuf3(rbuf2);
     rbuf.push_back(4);
     rbuf.push_back(2);
     rbuf.push_back(3);

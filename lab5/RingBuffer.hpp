@@ -3,57 +3,64 @@
 template<class T, class Alloc>
 void RingBuffer<T, Alloc>::allocate_buf()
 {
-	buffer_ = alloc_.allocate(capacity_);
+    buffer_ = alloc_.allocate(capacity_);
 }
 
 template<class T, class Alloc>
 void RingBuffer<T, Alloc>::destruct_buf()
 {
-	for (unsigned i = 0; i < capacity_; i++)
-		alloc_.destroy(buffer_ + i);
-	alloc_.deallocate(buffer_, capacity_);
+    for (Iterator iter = begin(); iter != end(); iter++)
+        alloc_.destroy(buffer_ + iter.elem_ind);
+    alloc_.deallocate(buffer_, capacity_);
+}
+
+template<class T, class Alloc>
+void RingBuffer<T, Alloc>::copy_buf(const RingBuffer<T, Alloc>& other)
+{
+    for (ConstIterator citer = other.cbegin(); citer != other.cend(); citer++)
+        alloc_.construct(buffer_ + citer.elem_ind, *citer);
 }
 
 template<class T, class Alloc>
 RingBuffer<T, Alloc>::RingBuffer(unsigned capacity, Alloc alloc)
         : capacity_(capacity)
-		  , alloc_(alloc)
+          , alloc_(alloc)
           , size_(0)
           , head_(0)
           , tail_(capacity > 1)
 {
-	allocate_buf();
+    allocate_buf();
 }
 
 template<class T, class Alloc>
 RingBuffer<T, Alloc>::~RingBuffer()
 {
-	destruct_buf();
+    destruct_buf();
 }
 
 template<class T, class Alloc>
 RingBuffer<T, Alloc>::RingBuffer(const RingBuffer<T, Alloc>& other)
         : capacity_(other.capacity_)
-		  , alloc_(other.alloc_)
+          , alloc_(other.alloc_)
           , size_(other.size_)
           , head_(other.head_)
           , tail_(other.tail_)
 {
-	allocate_buf();
-	std::copy(other.cbegin(), other.cend(), begin());
+    allocate_buf();
+    copy_buf(other);
 }
 
 template<class T, class Alloc>
 RingBuffer<T, Alloc>& RingBuffer<T, Alloc>::operator=(const RingBuffer<T, Alloc>& other)
 {
     if (this != &other) {
-		destruct_buf();
+        destruct_buf();
         capacity_ = other.capacity_;
         size_ = other.size_;
         head_ = other.head_;
         tail_ = other.tail_;
-		allocate_buf();
-        std::copy(other.begin(), other.end(), begin());
+        allocate_buf();
+        copy_buf(other);
     }
     return *this;
 }
@@ -103,7 +110,7 @@ void RingBuffer<T, Alloc>::push_back(const T& elem)
 {
     if (need_shift())
         shift(head_, 1);
-    buffer_[tail_] = elem;
+    alloc_.construct(buffer_ + tail_, elem);
     shift(tail_, 1);
     increase_size_and_check_for_fullness();
 }
@@ -114,7 +121,7 @@ void RingBuffer<T, Alloc>::push_front(const T& elem)
     if (need_shift())
         shift(tail_, -1);
     shift(head_, -1);
-    buffer_[head_] = elem;
+    alloc_.construct(buffer_ + head_, elem);
     increase_size_and_check_for_fullness();
 }
 
@@ -143,12 +150,13 @@ template<class T, class Alloc>
 void RingBuffer<T, Alloc>::resize(unsigned new_capacity)
 {
     T* tmp = alloc_.allocate(new_capacity);
-    for (unsigned i = 0; i < std::min(capacity_, new_capacity); ++i)
-        tmp[i] = buffer_[i];
-    capacity_ = new_capacity;    
+    for (Iterator iter = begin(); iter != end(); iter++)
+        if (iter.elem_ind < new_capacity)
+            alloc_.construct(tmp + iter.elem_ind, *iter);
+    capacity_ = new_capacity;
     if (size_ > capacity_)
         size_ = capacity_;
-	destruct_buf();
+    destruct_buf();
     buffer_ = tmp;
 }
 

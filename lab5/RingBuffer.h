@@ -35,6 +35,7 @@ public:
         using pointer = T*;
         using reference = T&;
         using iterator_category = std::random_access_iterator_tag;
+        friend RingBuffer;
 
         Iterator(RingBuffer* obj, int elem_ind, bool is_end);
 
@@ -71,6 +72,7 @@ public:
         using pointer = T*;
         using reference = T&;
         using iterator_category = std::random_access_iterator_tag;
+        friend RingBuffer;
 
         ConstIterator(const RingBuffer* obj, int elem_ind, bool is_end);
 
@@ -112,6 +114,8 @@ private:
     void allocate_buf();
 
     void destruct_buf();
+
+    void copy_buf(const RingBuffer& other);
 
     bool need_shift() const;
 

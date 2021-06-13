@@ -108,21 +108,25 @@ T RingBuffer<T, Alloc>::operator[](unsigned int index) const
 template<class T, class Alloc>
 void RingBuffer<T, Alloc>::push_back(const T& elem)
 {
+    increase_size_and_check_for_fullness();
     if (need_shift())
         shift(head_, 1);
+    if (full())
+        alloc_.destroy(buffer_ + tail_);
     alloc_.construct(buffer_ + tail_, elem);
     shift(tail_, 1);
-    increase_size_and_check_for_fullness();
 }
 
 template<class T, class Alloc>
 void RingBuffer<T, Alloc>::push_front(const T& elem)
 {
+    increase_size_and_check_for_fullness();
     if (need_shift())
         shift(tail_, -1);
     shift(head_, -1);
+    if (full())
+        alloc_.destroy(buffer_ + head_);
     alloc_.construct(buffer_ + head_, elem);
-    increase_size_and_check_for_fullness();
 }
 
 template<class T, class Alloc>
@@ -132,27 +136,30 @@ T RingBuffer<T, Alloc>::pop_back()
     if (need_shift())
         shift(head_, -1);
     shift(tail_, -1);
-    return buffer_[tail_];
+    T tmp(buffer_[tail_]);
+    destroy(buffer_ + tail_);
+    return tmp;
 }
 
 template<class T, class Alloc>
 T RingBuffer<T, Alloc>::pop_front()
 {
     size_--;
-    T* elem_ptr = buffer_ + head_;
+    T tmp(buffer_[head_]);
+    destroy(buffer_ + head_);
     if (need_shift())
         shift(tail_, 1);
     shift(head_, 1);
-    return *elem_ptr;
+    return tmp;
 }
 
 template<class T, class Alloc>
 void RingBuffer<T, Alloc>::resize(unsigned new_capacity)
 {
     T* tmp = alloc_.allocate(new_capacity);
-    for (Iterator iter = begin(); iter != end(); iter++)
-        if (iter.elem_ind < new_capacity)
-            alloc_.construct(tmp + iter.elem_ind, *iter);
+    unsigned i = 0;
+    for (Iterator iter = begin(); iter != end() && i < new_capacity; iter++, i++)
+        alloc_.construct(tmp + i, *iter);
     capacity_ = new_capacity;
     if (size_ > capacity_)
         size_ = capacity_;

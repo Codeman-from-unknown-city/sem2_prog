@@ -27,7 +27,8 @@ geometry::RegularPolygon::RegularPolygon(const geometry::RegularPolygon &regular
     , side_len(regular_polygon.side_len)
 {}
 
-geometry::RegularPolygon &geometry::RegularPolygon::operator=(const geometry::RegularPolygon &regular_polygon) {
+geometry::RegularPolygon&
+geometry::RegularPolygon::operator=(const geometry::RegularPolygon &regular_polygon) {
     if (this != &regular_polygon) {
         n_sides = regular_polygon.n_sides;
         side_len = regular_polygon.side_len;

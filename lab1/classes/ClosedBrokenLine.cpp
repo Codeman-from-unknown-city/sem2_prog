@@ -5,7 +5,8 @@
 geometry::ClosedBrokenLine::ClosedBrokenLine(Points points): BrokenLine(std::move(points))
 {}
 
-geometry::ClosedBrokenLine::ClosedBrokenLine(const geometry::ClosedBrokenLine& other): BrokenLine(other.points)
+geometry::ClosedBrokenLine::ClosedBrokenLine(const geometry::ClosedBrokenLine& other)
+    : BrokenLine(other.points)
 {}
 
 geometry::ClosedBrokenLine& geometry::ClosedBrokenLine::operator=(const geometry::ClosedBrokenLine& other) {

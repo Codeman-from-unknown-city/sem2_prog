@@ -9,7 +9,8 @@ geometry::ClosedBrokenLine::ClosedBrokenLine(const geometry::ClosedBrokenLine& o
     : BrokenLine(other.points)
 {}
 
-geometry::ClosedBrokenLine& geometry::ClosedBrokenLine::operator=(const geometry::ClosedBrokenLine& other) {
+geometry::ClosedBrokenLine& 
+geometry::ClosedBrokenLine::operator=(const geometry::ClosedBrokenLine& other) {
     if (this != &other)
         points = other.points;
     return *this;

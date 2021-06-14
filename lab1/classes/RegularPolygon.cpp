@@ -1,6 +1,5 @@
 #include <cmath>
 #include <stdexcept>
-
 #include "../lib/extended_math.h"
 #include "RegularPolygon.h"
 
